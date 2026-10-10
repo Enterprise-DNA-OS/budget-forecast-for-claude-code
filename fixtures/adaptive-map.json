@@ -1,0 +1,5 @@
+{
+  "_": "Map Adaptive Planning names to this system. levels: Adaptive level name -> entity name or adaptive_level. accounts: Adaptive code or name -> account code here.",
+  "levels": { "Harbourline NZ": "Harbourline NZ Ltd" },
+  "accounts": { "6450": "5000" }
+}

@@ -1,14 +1,43 @@
 [
   {
-    "name": "week",
-    "title": "This week",
-    "subtitle": "Budget and Forecast for Claude Code: what needs attention, rendered by npm run view",
+    "name": "month-end",
+    "title": "Month-end",
+    "subtitle": "Last closed month against the approved budget, what still needs a comment, and the close checklist",
     "sections": [
-      {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
-      }
+      { "title": "Variances that need a comment", "note": "Over both thresholds in the settings table and not yet explained.", "sql": "select entity, month, code, account, owner as budget_holder, actual, budget, variance, pct from v_commentary_due order by entity, abs(variance) desc" },
+      { "title": "Close checklist", "sql": "select entity, month, task, owner, due_on, done_on, state from v_close c where c.period = (select max(period) from close_tasks t where t.entity_id = c.entity_id) order by entity, state, due_on" },
+      { "title": "Where the year lands", "sql": "select entity, currency, code, account, actual_to_date, forecast_rest, outlook, budget, gap from v_outlook order by entity, code" },
+      { "title": "Forecast not rolled", "sql": "select entity, months as closed_months_still_forecast from v_unrolled order by entity" }
+    ]
+  },
+  {
+    "name": "cash-and-covenants",
+    "title": "Cash and covenants",
+    "subtitle": "Closing cash on actuals then the current forecast, and every bank covenant test",
+    "sections": [
+      { "title": "Cash", "sql": "select entity, currency, month, basis, closing_cash from v_cash order by entity, period" },
+      { "title": "Covenants", "sql": "select entity, lender, metric, test, threshold, last_tested, last_value, last_passed, first_forecast_breach, breach_value from v_covenants order by entity, metric" },
+      { "title": "Every covenant test", "sql": "select entity, lender, metric, month, basis, value, passes from v_covenant_tests order by entity, metric, period" }
+    ]
+  },
+  {
+    "name": "plan",
+    "title": "The plan",
+    "subtitle": "Versions, the hiring plan and distributions",
+    "sections": [
+      { "title": "Versions", "sql": "select name, kind, to_char(starts_on, 'YYYY-MM') as starts, to_char(ends_on, 'YYYY-MM') as ends, locked, approved_by, approved_on, line_count from v_versions order by kind, starts_on" },
+      { "title": "Hiring plan", "sql": "select entity, role, person, status, starts_on, ends_on, annual_salary, oncost_rate, monthly_cost, cost_in_forecast from v_headcount where status <> 'cancelled' order by entity, starts_on" },
+      { "title": "Distributions", "sql": "select entity, currency, amount, status, declared_on, pay_on, solvency_certificate_on, net_assets_before, lowest_cash_after from v_distributions order by pay_on" }
+    ]
+  },
+  {
+    "name": "record-checks",
+    "title": "Record checks",
+    "subtitle": "Rules and sources in docs/compliance.md",
+    "sections": [
+      { "title": "Findings", "sql": "select rule, item, finding from v_compliance order by rule, item" },
+      { "title": "GST and BAS", "sql": "select entity, return_type, period_end, due_on, lodged_on, state from v_tax_calendar order by due_on desc" },
+      { "title": "Needs a person", "sql": "select item, issue, detail from v_attention order by issue, item" }
     ]
   }
 ]

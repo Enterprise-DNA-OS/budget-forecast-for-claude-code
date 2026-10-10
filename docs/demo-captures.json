@@ -1,0 +1,24 @@
+{
+  "captured": "2026-10-10T12:07:00.765Z",
+  "data": "Fictional seeded demo",
+  "screens": [
+    {
+      "title": "Variances nobody has explained",
+      "ask": "Which lines came in well away from budget last month, and who still owes us an explanation?",
+      "command": "npm run plan -- commentary-due",
+      "output": "  entity                         currency  month    code  account    owner       actual  budget  variance  pct\n  -----------------------------  --------  -------  ----  ---------  ----------  ------  ------  --------  ------\n  Harbourline Australia Pty Ltd  AUD       2026-09  6200  Marketing  Tama Ngata  20,160  12,600  -7,560    -60.0\n  Harbourline NZ Ltd             NZD       2026-09  6200  Marketing  Tama Ngata  46,200  23,100  -23,100   -100.0"
+    },
+    {
+      "title": "When the bank minimum bites",
+      "ask": "Do we breach any bank covenant this year on the current forecast?",
+      "command": "npm run plan -- covenants",
+      "output": "  entity              lender      metric          test  threshold  frequency  last_tested  last_value  last_passed  first_forecast_breach  breach_value\n  ------------------  ----------  --------------  ----  ---------  ---------  -----------  ----------  -----------  ---------------------  ------------\n  Harbourline NZ Ltd  Kauri Bank  debt to ebitda  <=    2.5        quarterly  2026-09      1.32        true\n  Harbourline NZ Ltd  Kauri Bank  interest cover  >=    3          quarterly  2026-09      8.71        true\n  Harbourline NZ Ltd  Kauri Bank  minimum cash    >=    250,000    monthly    2026-09      455,000     true         2027-03                245,000"
+    },
+    {
+      "title": "Can we pay the dividend?",
+      "ask": "Can we pay the dividends on the table and still have cash for the next twelve months?",
+      "command": "npm run plan -- distributions",
+      "output": "  entity                         currency  amount   status    declared_on  pay_on      solvency_certificate_on  approved_by         in_forecast  net_assets_before  lowest_cash_after\n  -----------------------------  --------  -------  --------  -----------  ----------  -----------------------  ------------------  -----------  -----------------  -----------------\n  Harbourline NZ Ltd             NZD       150,000  paid      2026-09-20   2026-09-30                           Board of directors  true         701,000\n  Harbourline Australia Pty Ltd  AUD       400,000  proposed               2026-11-09                                               false        625,000            -30,000"
+    }
+  ]
+}

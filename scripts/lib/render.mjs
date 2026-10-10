@@ -31,6 +31,8 @@ function fmt(v, key, row) {
   if (key.endsWith('_cents')) return `${row.currency || ''} ${(Number(v) / 100).toFixed(2)}`.trim();
   if (typeof v === 'object') return JSON.stringify(v);
   if (typeof v === 'number' && !Number.isInteger(v)) return v.toFixed(2);
+  // Amounts arrive from Postgres as numeric strings. Separate thousands, leave codes and references alone.
+  if (!/code|reference|year|id$/.test(key) && /^-?\d+(\.\d+)?$/.test(String(v)) && Math.abs(Number(v)) >= 1000) return Number(v).toLocaleString('en-NZ', { maximumFractionDigits: 2 });
   return v;
 }
 

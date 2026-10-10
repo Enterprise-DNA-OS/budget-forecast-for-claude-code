@@ -1,11 +1,40 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "board-pack",
+    "title": "Board pack",
+    "for_each": "select id, name from entities where active order by name",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      { "title": "Where the year lands", "note": "Actuals to the last closed month plus the current forecast, against the approved budget. A positive gap is better than budget.", "sql": "select code, account, actual_to_date, forecast_rest, outlook, budget, gap from v_outlook where entity_id = $1 order by code" },
+      { "title": "Last month against budget", "sql": "select month, code, account, actual, budget, variance, pct, explained from v_variance where entity_id = $1 order by abs(variance) desc" },
+      { "title": "What the budget holders said", "sql": "select a.code, a.name as account, c.note, c.actor as by from commentary c join accounts a on a.id = c.account_id join v_latest m on m.entity_id = c.entity_id and c.period = m.last_actual where c.entity_id = $1 order by a.code" },
+      { "title": "Cash", "sql": "select month, basis, closing_cash from v_cash where entity_id = $1 and period >= (select last_actual from v_latest where entity_id = $1) - interval '2 months' order by period" },
+      { "title": "Bank covenants", "sql": "select lender, metric, test, threshold, last_tested, last_value, last_passed, first_forecast_breach, breach_value from v_covenants where entity_id = $1" },
+      { "title": "People", "sql": "select role, person, status, starts_on, ends_on, annual_salary, oncost_rate, cost_in_forecast from v_headcount where entity_id = $1 and status <> 'cancelled' order by starts_on" },
+      { "title": "Record checks", "sql": "select rule, item, finding from v_compliance where item like '%' || (select name from entities where id = $1) || '%' order by rule" }
+    ]
+  },
+  {
+    "name": "covenant-certificate",
+    "title": "Covenant compliance certificate (draft)",
+    "for_each": "select distinct e.id, e.name from entities e join covenants c on c.entity_id = e.id where c.active order by e.name",
+    "file": "name",
+    "sections": [
+      { "title": "Tests on the last closed quarter or month", "note": "Check each figure against the definitions in the facility agreement before a director signs.", "sql": "select distinct on (covenant_id) lender, metric, test, threshold, month as tested, value, passes from v_covenant_tests where entity_id = $1 and basis = 'actual' order by covenant_id, period desc" },
+      { "title": "The next twelve months on the current forecast", "sql": "select lender, metric, month, value, passes from v_covenant_tests where entity_id = $1 and basis = 'forecast' order by metric, period" },
+      { "title": "Signature", "sql": "select 'Signed for and on behalf of the borrower by a director' as statement, '' as name, '' as signature, '' as date where $1::text is not null" }
+    ]
+  },
+  {
+    "name": "solvency-certificate",
+    "title": "Distribution and solvency working paper (draft)",
+    "for_each": "select d.id, e.name || ' ' || d.pay_on as name from distributions d join entities e on e.id = d.entity_id where d.status <> 'cancelled' order by d.pay_on",
+    "file": "name",
+    "sections": [
+      { "title": "The distribution", "sql": "select entity, country, currency, amount, status, declared_on, pay_on, approved_by, solvency_certificate_on, in_forecast from v_distributions where id = $1" },
+      { "title": "Balance sheet at the last closed month", "sql": "select to_char(m.period, 'YYYY-MM') as month, m.assets, m.liabilities, m.assets - m.liabilities as net_assets from v_monthly m join distributions d on d.entity_id = m.entity_id where d.id = $1 and m.basis = 'actual' and m.assets is not null order by m.period desc limit 1" },
+      { "title": "Forecast cash for twelve months from payment", "note": "Lowest point after paying, unless the forecast already includes the payment.", "sql": "select c.month, c.basis, c.closing_cash, c.closing_cash - case when d.in_forecast then 0 else d.amount end as after_distribution from v_cash c join distributions d on d.entity_id = c.entity_id where d.id = $1 and c.period >= date_trunc('month', d.pay_on) and c.period < date_trunc('month', d.pay_on) + interval '12 months' order by c.period" },
+      { "title": "The rule this supports", "sql": "select case e.country when 'NZ' then 'Companies Act 1993 s52: the board must be satisfied on reasonable grounds that the company will meet the solvency test (s4) immediately after the distribution, and every director who votes for it signs a certificate saying so.' else 'Corporations Act 2001 (Cth) s254T: a dividend only if assets exceed liabilities immediately before it is declared and the excess is enough to pay it, it is fair and reasonable to shareholders as a whole, and it does not materially prejudice the ability to pay creditors.' end as rule, 'A working paper for the directors, not legal advice.' as note from distributions d join entities e on e.id = d.entity_id where d.id = $1" }
     ]
   }
 ]

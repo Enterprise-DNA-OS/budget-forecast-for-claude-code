@@ -1,0 +1,12 @@
+[
+  { "question": "Which lines came in well away from budget last month and still have no explanation?", "command": "npm run plan -- commentary-due" },
+  { "question": "Where will we land for the year against the board budget, line by line?", "command": "npm run plan -- outlook" },
+  { "question": "In which month does cash drop below the bank's minimum on the current forecast?", "command": "npm run plan -- covenants" },
+  { "question": "What changed between the board budget and the latest reforecast?", "command": "npm run plan -- compare --a=\"Board budget\" --b=\"Reforecast 1\"" },
+  { "question": "What is our lowest cash point over the forecast, and when?", "command": "npm run plan -- cash" },
+  { "question": "Is every planned hire costed at the KiwiSaver or super guarantee rate that applies when they start?", "command": "npm run plan -- compliance" },
+  { "question": "Which GST returns or BAS are due or overdue?", "command": "npm run plan -- tax-calendar" },
+  { "question": "Can we pay the proposed dividend and still have cash for the next twelve months?", "command": "npm run plan -- distributions" },
+  { "question": "Which month-end close tasks are late, and who owns them?", "command": "npm run plan -- close" },
+  { "question": "Is the forecast still carrying forecast figures for months we have already closed?", "command": "npm run plan -- attention" }
+]
